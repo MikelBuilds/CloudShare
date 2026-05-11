@@ -1,4 +1,4 @@
-import { Download, Trash2, Share2, FileText, Image as ImageIcon, Video, Music, File as FileIcon, ExternalLink } from 'lucide-react';
+import { Download, Trash2, Share2, FileText, Image as ImageIcon, Video, Music, File as FileIcon } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import api, { API_BASE_URL } from '../api/api';
 
@@ -22,18 +22,17 @@ export default function FileCard({ file, onDelete }) {
     try {
       window.open(`${API_BASE_URL}/api/files/download/${file.id}`, '_blank');
       toast.success('Starting download...');
-    } catch (error) {
+    } catch {
       toast.error("Download failed");
     }
   };
-// ... rest of component stays same
 
   const handleShare = async () => {
     try {
       const res = await api.post(`/api/files/share/${file.id}`);
       await navigator.clipboard.writeText(res.data.shareLink);
       toast.success('Share link copied to clipboard!');
-    } catch (error) {
+    } catch {
       toast.error("Failed to generate share link");
     }
   };

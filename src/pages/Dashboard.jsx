@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { toast } from 'react-hot-toast';
 import { LayoutGrid, List, Clock, FolderOpen } from 'lucide-react';
 import api from '../api/api';
@@ -10,8 +10,8 @@ export default function Dashboard() {
   const [logs, setLogs] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const fetchData = async () => {
-    setLoading(true);
+  const fetchData = useCallback(async (silent = false) => {
+    if (!silent) setLoading(true);
     try {
       const [filesRes, logsRes] = await Promise.all([
         api.get('/api/files'),
@@ -19,16 +19,19 @@ export default function Dashboard() {
       ]);
       setFiles(filesRes.data);
       setLogs(logsRes.data);
-    } catch (error) {
+    } catch {
       toast.error("Failed to load dashboard data");
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
-    fetchData();
-  }, []);
+    const timer = setTimeout(() => {
+      fetchData(true); // silent = true because loading is already true
+    }, 0);
+    return () => clearTimeout(timer);
+  }, [fetchData]);
 
   const handleDelete = async (id) => {
     if (!window.confirm("Are you sure you want to delete this file?")) return;
@@ -39,7 +42,7 @@ export default function Dashboard() {
       // Refresh logs silently
       const logsRes = await api.get('/api/logs/mine');
       setLogs(logsRes.data);
-    } catch (error) {
+    } catch {
       toast.error("Failed to delete file");
     }
   };

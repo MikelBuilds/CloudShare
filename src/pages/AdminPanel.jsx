@@ -9,8 +9,8 @@ export default function AdminPanel() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchAdminData = async () => {
-      setLoading(true);
+    const fetchAdminData = async (silent = false) => {
+      if (!silent) setLoading(true);
       try {
         const [statsRes, usersRes] = await Promise.all([
           api.get('/api/admin/stats'),
@@ -18,13 +18,16 @@ export default function AdminPanel() {
         ]);
         setStats(statsRes.data);
         setUsers(usersRes.data);
-      } catch (error) {
+      } catch {
         toast.error("Failed to load admin data");
       } finally {
         setLoading(false);
       }
     };
-    fetchAdminData();
+    const timer = setTimeout(() => {
+      fetchAdminData(true);
+    }, 0);
+    return () => clearTimeout(timer);
   }, []);
 
   const changeRole = async (userId, currentRole) => {
@@ -33,7 +36,7 @@ export default function AdminPanel() {
       await api.patch(`/api/admin/users/${userId}/role`, { role: newRole });
       setUsers(users.map(u => u.id === userId ? { ...u, role: newRole } : u));
       toast.success(`Role updated to ${newRole}`);
-    } catch (error) {
+    } catch {
       toast.error("Failed to update role");
     }
   };

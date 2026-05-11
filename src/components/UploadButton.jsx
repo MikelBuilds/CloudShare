@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react';
-import { UploadCloud, X, File, CheckCircle2, AlertCircle } from 'lucide-react';
+import { UploadCloud, X, File, CheckCircle2 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import api from '../api/api';
 
@@ -8,11 +8,13 @@ export default function UploadButton({ onUploadSuccess }) {
   const [uploading, setUploading] = useState(false);
   const [progress, setProgress] = useState(0);
   const [showModal, setShowModal] = useState(false);
+  const [selectedFileName, setSelectedFileName] = useState('');
   const fileInputRef = useRef(null);
 
   const handleFileSelect = (e) => {
     const files = e.target.files || e.dataTransfer.files;
     if (files.length > 0) {
+      setSelectedFileName(files[0].name);
       uploadFile(files[0]);
     }
   };
@@ -100,7 +102,7 @@ export default function UploadButton({ onUploadSuccess }) {
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium text-slate-700 truncate">
-                    {fileInputRef.current?.files[0]?.name || 'Preparing file...'}
+                    {selectedFileName || 'Preparing file...'}
                   </p>
                   <p className="text-xs text-slate-400">
                     {progress === 100 ? 'Processing...' : `${progress}% uploaded`}
